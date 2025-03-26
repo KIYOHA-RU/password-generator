@@ -11,7 +11,6 @@ app = Flask(__name__)
 
 DB_NAME = "history.db"
 
-# DB初期化
 def init_db():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
@@ -25,7 +24,6 @@ def init_db():
     conn.commit()
     conn.close()
 
-# 履歴保存
 def save_history(password):
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
@@ -33,24 +31,6 @@ def save_history(password):
     conn.commit()
     conn.close()
 
-# 履歴取得（UTC → JST変換付き）
-def get_history():
-    conn = sqlite3.connect(DB_NAME)
-    c = conn.cursor()
-    c.execute('SELECT password, created_at FROM history ORDER BY id DESC LIMIT 50')
-    rows = c.fetchall()
-    conn.close()
-
-    # JST変換
-    jst = timezone(timedelta(hours=9))
-    converted = []
-    for pw, created_at in rows:
-        utc_time = datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S')
-        jst_time = utc_time.replace(tzinfo=timezone.utc).astimezone(jst)
-        converted.append((pw, jst_time.strftime('%Y-%m-%d %H:%M:%S')))
-    return converted
-
-# パスワード生成ロジック
 def generate_password():
     def has_consecutive_sequence(s):
         for i in range(len(s) - 2):
@@ -87,7 +67,6 @@ def generate_password():
         last_digits = generate_non_consecutive_digits(4)
         return first_three + '-' + last_digits
 
-# メイン画面
 @app.route("/", methods=["GET", "POST"])
 def index():
     passwords = []
@@ -100,18 +79,32 @@ def index():
                 pw_last_two = pw[-2:]
                 if pw_last_two != last_two:
                     passwords.append(pw)
-                    save_history(pw)  # 履歴保存
+                    save_history(pw)
                     last_two = pw_last_two
                     break
     return render_template("index.html", passwords=passwords)
 
-# 履歴画面
 @app.route("/history")
 def history():
-    logs = get_history()
-    return render_template("history.html", logs=logs)
+    page = int(request.args.get('page', 1))
+    per_page = 500
+    offset = (page - 1) * per_page
 
-# Excelダウンロード
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute('SELECT password, created_at FROM history ORDER BY id DESC LIMIT ? OFFSET ?', (per_page, offset))
+    rows = c.fetchall()
+    conn.close()
+
+    # JST変換
+    jst = timezone(timedelta(hours=9))
+    converted = []
+    for pw, created_at in rows:
+        utc_time = datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S')
+        jst_time = utc_time.replace(tzinfo=timezone.utc).astimezone(jst)
+        converted.append((pw, jst_time.strftime('%Y-%m-%d %H:%M:%S')))
+    return render_template("history.html", logs=converted, current_page=page)
+
 @app.route("/download", methods=["POST"])
 def download():
     passwords = request.form.getlist("passwords")
@@ -125,6 +118,6 @@ def download():
     return send_file(stream, as_attachment=True, download_name="passwords.xlsx", mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 if __name__ == "__main__":
-    init_db()  # DB初期化
+    init_db()
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)

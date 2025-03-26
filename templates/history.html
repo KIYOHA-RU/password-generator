@@ -2,15 +2,23 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>履歴</title>
+  <title>パスワード生成履歴</title>
 </head>
 <body>
-  <h1>パスワード生成履歴</h1>
+  <h1>パスワード生成履歴（ページ {{ current_page }}）</h1>
   <ul>
     {% for pw, created_at in logs %}
       <li>{{ created_at }} - {{ pw }}</li>
     {% endfor %}
   </ul>
-  <a href="/">← 戻る</a>
+
+  <br>
+  <a href="/history?page={{ current_page + 1 }}">次のページ →</a>
+  {% if current_page > 1 %}
+    | <a href="/history?page={{ current_page - 1 }}">← 前のページ</a>
+  {% endif %}
+
+  <br><br>
+  <a href="/">← トップへ戻る</a>
 </body>
 </html>
