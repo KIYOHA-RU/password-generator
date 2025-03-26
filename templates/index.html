@@ -5,11 +5,11 @@
   <title>パスワード生成</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col items-center py-8">
+<body class="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-white font-sans min-h-screen flex flex-col items-center py-8">
 
-  <h1 class="text-4xl font-bold text-center text-blue-600 mb-8">パスワード生成ツール</h1>
+  <h1 class="text-4xl font-bold text-center text-white mb-8">パスワード生成ツール</h1>
 
-  <form method="POST" class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mb-8">
+  <form method="POST" class="bg-white bg-opacity-80 p-8 rounded-lg shadow-lg w-full max-w-md mb-8">
     <label class="block text-lg mb-4">生成数：</label>
     <input type="number" name="count" value="10" class="border border-gray-300 p-3 w-full rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400">
     <button type="submit" class="bg-blue-500 text-white px-6 py-3 rounded-lg w-full hover:bg-blue-600 transition">生成</button>
@@ -32,7 +32,7 @@
     </div>
 
     <h2 class="text-3xl font-semibold mb-4 text-gray-700">生成結果</h2>
-    <ul class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md divide-y divide-gray-200">
+    <ul class="bg-white bg-opacity-80 p-6 rounded-lg shadow-lg w-full max-w-md divide-y divide-gray-200">
       {% for pw in passwords %}
         <li class="py-3 text-lg text-gray-600">{{ pw }}</li>
       {% endfor %}
