@@ -5,38 +5,36 @@
   <title>パスワード生成</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col items-center py-8">
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col items-center py-8">
 
-  <h1 class="text-3xl font-bold mb-6">パスワード生成</h1>
+  <h1 class="text-4xl font-bold text-center text-blue-600 mb-8">パスワード生成ツール</h1>
 
-  <form method="POST" class="bg-white p-6 rounded shadow-md w-full max-w-md mb-8">
-    <label class="block mb-4">
-      生成数：
-      <input type="number" name="count" value="10" class="border p-2 w-full rounded mt-2">
-    </label>
-    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full">生成</button>
+  <form method="POST" class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mb-8">
+    <label class="block text-lg mb-4">生成数：</label>
+    <input type="number" name="count" value="10" class="border border-gray-300 p-3 w-full rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400">
+    <button type="submit" class="bg-blue-500 text-white px-6 py-3 rounded-lg w-full hover:bg-blue-600 transition">生成</button>
   </form>
 
   {% if passwords %}
     <div class="flex gap-4 mb-6">
       <!-- ダウンロードボタン -->
-      <form method="POST" action="/download">
+      <form method="POST" action="/download" class="w-full">
         {% for pw in passwords %}
           <input type="hidden" name="passwords" value="{{ pw }}">
         {% endfor %}
-        <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Excelダウンロード</button>
+        <button type="submit" class="bg-green-500 text-white px-6 py-3 rounded-lg w-full hover:bg-green-600 transition">Excelダウンロード</button>
       </form>
 
       <!-- 履歴ボタン -->
-      <form method="GET" action="/history">
-        <button type="submit" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">📜 履歴を見る</button>
+      <form method="GET" action="/history" class="w-full">
+        <button type="submit" class="bg-gray-500 text-white px-6 py-3 rounded-lg w-full hover:bg-gray-600 transition">📜 履歴を見る</button>
       </form>
     </div>
 
-    <h2 class="text-2xl font-semibold mb-4">生成結果</h2>
-    <ul class="bg-white p-6 rounded shadow-md w-full max-w-md">
+    <h2 class="text-3xl font-semibold mb-4 text-gray-700">生成結果</h2>
+    <ul class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md divide-y divide-gray-200">
       {% for pw in passwords %}
-        <li class="border-b py-2">{{ pw }}</li>
+        <li class="py-3 text-lg text-gray-600">{{ pw }}</li>
       {% endfor %}
     </ul>
   {% endif %}
