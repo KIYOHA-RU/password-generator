@@ -3,29 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <title>パスワード生成</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>パスワード生成</h1>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col items-center py-8">
 
-  <form method="POST">
-    生成数：<input type="number" name="count" value="10">
-    <button type="submit">生成</button>
+  <h1 class="text-3xl font-bold mb-6">パスワード生成</h1>
+
+  <form method="POST" class="bg-white p-6 rounded shadow-md w-full max-w-md mb-8">
+    <label class="block mb-4">
+      生成数：
+      <input type="number" name="count" value="10" class="border p-2 w-full rounded mt-2">
+    </label>
+    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full">生成</button>
   </form>
 
   {% if passwords %}
-    <h2>生成結果</h2>
-    <form method="POST" action="/download">
-      <ul>
+    <div class="flex gap-4 mb-6">
+      <!-- ダウンロードボタン -->
+      <form method="POST" action="/download">
         {% for pw in passwords %}
-          <li>{{ pw }}<input type="hidden" name="passwords" value="{{ pw }}"></li>
+          <input type="hidden" name="passwords" value="{{ pw }}">
         {% endfor %}
-      </ul>
-      <button type="submit">Excelダウンロード</button>
-    </form>
+        <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Excelダウンロード</button>
+      </form>
+
+      <!-- 履歴ボタン -->
+      <form method="GET" action="/history">
+        <button type="submit" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">📜 履歴を見る</button>
+      </form>
+    </div>
+
+    <h2 class="text-2xl font-semibold mb-4">生成結果</h2>
+    <ul class="bg-white p-6 rounded shadow-md w-full max-w-md">
+      {% for pw in passwords %}
+        <li class="border-b py-2">{{ pw }}</li>
+      {% endfor %}
+    </ul>
   {% endif %}
 
-  <br><br>
-  <a href="/history">📜 履歴を見る</a>  ←★ ここで履歴ページに飛べる！
 </body>
 </html>
