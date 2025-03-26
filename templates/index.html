@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>パスワード生成</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h1>パスワード生成</h1>
+  <form method="POST">
+    生成数：<input type="number" name="count" value="10">
+    <button type="submit">生成</button>
+  </form>
+
+  {% if passwords %}
+    <h2>生成結果</h2>
+    <form method="POST" action="/download">
+      <ul>
+        {% for pw in passwords %}
+          <li>{{ pw }}<input type="hidden" name="passwords" value="{{ pw }}"></li>
+        {% endfor %}
+      </ul>
+      <button type="submit">Excelダウンロード</button>
+    </form>
+  {% endif %}
+</body>
+</html>
