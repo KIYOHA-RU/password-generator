@@ -31,57 +31,53 @@ def save_history(password):
     conn.commit()
     conn.close()
 
-def generate_password():
-    def has_consecutive_sequence(s):
-        for i in range(len(s) - 2):
-            if int(s[i+1]) == int(s[i]) + 1 and int(s[i+2]) == int(s[i+1]) + 1:
-                return True
-        return False
+# 連続する文字や数字をチェックする
+def has_consecutive_sequence(s):
+    for i in range(len(s) - 2):
+        if int(s[i+1]) == int(s[i]) + 1 and int(s[i+2]) == int(s[i+1]) + 1:
+            return True
+    return False
 
-    def has_same_digit_repeat(s):
-        for i in range(len(s) - 1):
-            if s[i] == s[i+1]:
-                return True
-        return False
+def has_same_digit_repeat(s):
+    for i in range(len(s) - 1):
+        if s[i] == s[i+1]:
+            return True
+    return False
 
-    def has_repeated_characters(s):
-        for i in range(len(s) - 1):
-            if s[i] == s[i + 1]:
-                return True
-        return False
-
-    def generate_non_consecutive_digits(length):
-        digits = string.digits
-        while True:
-            result = ''.join(random.choices(digits, k=length))
-            if not has_consecutive_sequence(result) and not has_same_digit_repeat(result):
-                return result
-
-    custom_alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz"
+def generate_password(length, use_uppercase, use_lowercase, use_numbers):
+    # 使用する文字を決定
+    allowed_chars = ''
+    if use_uppercase:
+        allowed_chars += string.ascii_uppercase
+    if use_lowercase:
+        allowed_chars += string.ascii_lowercase
+    if use_numbers:
+        allowed_chars += string.digits
+    
     while True:
-        first_char = random.choice(custom_alphabet[:24])
-        next_two_chars = ''.join(random.choices(custom_alphabet[24:], k=2))
-        first_three = first_char + next_two_chars
-        if has_repeated_characters(first_three):
+        password = ''.join(random.choices(allowed_chars, k=length))
+
+        # 連続する文字や数字、2桁同じ文字を禁止
+        if has_consecutive_sequence(password) or has_same_digit_repeat(password):
             continue
-        last_digits = generate_non_consecutive_digits(4)
-        return first_three + '-' + last_digits
+        
+        return password
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     passwords = []
     if request.method == "POST":
-        count = int(request.form.get("count", 10))
-        last_two = None
-        for _ in range(count):
-            while True:
-                pw = generate_password()
-                pw_last_two = pw[-2:]
-                if pw_last_two != last_two:
-                    passwords.append(pw)
-                    save_history(pw)
-                    last_two = pw_last_two
-                    break
+        length = int(request.form.get("length", 10))
+        use_uppercase = "uppercase" in request.form
+        use_lowercase = "lowercase" in request.form
+        use_numbers = "numbers" in request.form
+
+        # パスワード生成
+        for _ in range(10):  # 10個生成（数は自由に変更可能）
+            pw = generate_password(length, use_uppercase, use_lowercase, use_numbers)
+            passwords.append(pw)
+            save_history(pw)
+    
     return render_template("index.html", passwords=passwords)
 
 @app.route("/history")
