@@ -10,27 +10,8 @@
   <h1 class="text-4xl font-bold text-center text-white mb-8">パスワード生成ツール</h1>
 
   <form method="POST" class="bg-white bg-opacity-80 p-8 rounded-lg shadow-lg w-full max-w-md mb-8">
-    <!-- パスワードの長さ -->
-    <label class="block text-lg mb-4 text-gray-900">パスワードの長さ</label>
-    <input type="number" name="length" min="6" max="20" value="10" class="border border-gray-300 p-3 w-full rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400">
-    
-    <!-- 文字種の選択 -->
-    <label class="block text-lg mb-4 text-gray-900">使用する文字</label>
-    <div class="flex gap-4 mb-6">
-      <label class="flex items-center">
-        <input type="checkbox" name="uppercase" checked class="mr-2">
-        大文字
-      </label>
-      <label class="flex items-center">
-        <input type="checkbox" name="lowercase" checked class="mr-2">
-        小文字
-      </label>
-      <label class="flex items-center">
-        <input type="checkbox" name="numbers" checked class="mr-2">
-        数字
-      </label>
-    </div>
-
+    <label class="block text-lg mb-4 text-gray-900">生成数：</label>
+    <input type="number" name="count" value="10" class="border border-gray-300 p-3 w-full rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400">
     <button type="submit" class="bg-blue-500 text-white px-6 py-3 rounded-lg w-full hover:bg-blue-600 transition">生成</button>
   </form>
 
