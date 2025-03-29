@@ -1,45 +1,38 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>パスワード生成履歴</title>
+  <title>パスワード履歴</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 </head>
-<body class="bg-gradient-to-br from-purple-200 via-sky-100 to-green-100 text-gray-800 font-[Ayuthaya,Helvetica,sans-serif] min-h-screen py-10 px-4">
-
-  <div class="max-w-4xl mx-auto">
-    <h1 class="text-4xl font-bold text-center mb-10 text-purple-700 drop-shadow">📜 パスワード生成履歴</h1>
-
-    <div class="overflow-x-auto backdrop-blur-lg bg-white/60 p-6 rounded-2xl shadow-xl">
-      <table class="w-full text-left rounded-xl">
-        <thead>
-          <tr class="text-purple-800 border-b border-purple-300">
-            <th class="p-4 text-lg">パスワード</th>
-            <th class="p-4 text-lg">生成日時</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for pw, time in logs %}
-          <tr class="border-t border-purple-100 hover:bg-purple-50 transition">
-            <td class="p-4 text-purple-900 font-medium">{{ pw }}</td>
-            <td class="p-4 text-gray-700">{{ time }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <div class="flex justify-between items-center mt-8">
-      {% if current_page > 1 %}
-        <a href="/history?page={{ current_page - 1 }}" class="text-sky-600 hover:underline">← 前のページ</a>
-      {% endif %}
-      <a href="/history?page={{ current_page + 1 }}" class="text-sky-600 hover:underline ml-auto">次のページ →</a>
-    </div>
-
-    <div class="mt-12 text-center">
-      <a href="/" class="bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 transition">← パスワード生成に戻る</a>
-    </div>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen p-6">
+  <h1 class="text-3xl font-bold text-purple-700 mb-6">📜 パスワード生成履歴</h1>
+  <div class="overflow-x-auto">
+    <table class="min-w-full table-auto bg-white shadow rounded-lg">
+      <thead class="bg-purple-100 text-purple-800">
+        <tr>
+          <th class="px-4 py-2 text-left">パスワード</th>
+          <th class="px-4 py-2 text-left">生成日時</th>
+          <th class="px-4 py-2 text-left">デバイス情報</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pw, date, ua in logs %}
+        <tr class="border-b border-gray-200">
+          <td class="py-2 px-4">{{ pw }}</td>
+          <td class="py-2 px-4">{{ date }}</td>
+          <td class="py-2 px-4 text-xs text-gray-500 break-all">{{ ua }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
-
+  <div class="mt-6">
+    {% if current_page > 1 %}
+      <a href="/history?page={{ current_page - 1 }}" class="mr-4 text-blue-600 hover:underline">← 前のページ</a>
+    {% endif %}
+    <a href="/history?page={{ current_page + 1 }}" class="text-blue-600 hover:underline">次のページ →</a>
+  </div>
 </body>
 </html>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>パスワード生成</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}?v=123" type="image/x-icon">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 </head>
 <body class="bg-gradient-to-br from-purple-200 via-sky-100 to-green-100 text-gray-800 font-[Ayuthaya,Helvetica,sans-serif] min-h-screen flex flex-col items-center py-12 px-4">
 
@@ -16,18 +16,17 @@
 
     <label class="block text-lg mb-2 text-purple-800 font-semibold">数字部分の桁数：</label>
     <select name="digit_length" class="border border-purple-300 p-3 w-full rounded-lg mb-6">
-      <option value="4">4桁</option>
-      <option value="5" selected>5桁</option>
+      <option value="4" {% if digit_length == 4 %}selected{% endif %}>4桁</option>
+      <option value="5" {% if digit_length == 5 %}selected{% endif %}>5桁</option>
     </select>
 
     <button type="submit" class="bg-purple-500 text-white px-6 py-3 rounded-lg w-full hover:bg-purple-600 transition">✨ 生成 ✨</button>
   </form>
 
-  <!-- ✅ 生成条件 表示 -->
   <div class="bg-white/50 backdrop-blur-md p-4 rounded-xl shadow w-full max-w-md mb-10 text-sm text-purple-900">
     <p>✅ 先頭アルファベット3文字は <strong>連続・重複なし</strong></p>
     <p>✅ 数字は <strong>4桁または5桁選択可</strong>、<strong>連番・同一数字なし</strong></p>
-    <p>✅ (生成例)Hix-39017</p>
+    <p>✅ (生成例) Hix-39017</p>
   </div>
 
   {% if passwords %}
@@ -52,9 +51,15 @@
     </ul>
   {% endif %}
 
-  <!-- 👣 コピーライト -->
-  <footer class="mt-16 text-center text-sm text-purple-600">
-    © Miura_Bertone👣
+  <!-- ✅ 常時表示の履歴ボタン（最下部） -->
+  <div class="mt-16 mb-4 w-full max-w-md">
+    <a href="/history" class="block text-center bg-sky-400 text-white px-6 py-3 rounded-lg hover:bg-sky-500 transition">
+      📜 履歴を見る
+    </a>
+  </div>
+
+  <footer class="mt-4 text-center text-sm text-purple-600">
+    © NAKAE
   </footer>
 
 </body>

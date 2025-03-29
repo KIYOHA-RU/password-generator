@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, send_file, request
 import io
 from openpyxl import Workbook
@@ -14,20 +13,22 @@ DB_NAME = "history.db"
 def init_db():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-    c.execute("""
+    c.execute('''
         CREATE TABLE IF NOT EXISTS history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             password TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            user_agent TEXT
         )
-    """)
+    ''')
     conn.commit()
     conn.close()
 
 def save_history(password):
+    user_agent = request.headers.get("User-Agent")
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-    c.execute('INSERT INTO history (password) VALUES (?)', (password,))
+    c.execute('INSERT INTO history (password, user_agent) VALUES (?, ?)', (password, user_agent))
     conn.commit()
     conn.close()
 
@@ -71,20 +72,21 @@ def generate_password(digit_length=5):
 @app.route("/", methods=["GET", "POST"])
 def index():
     passwords = []
+    digit_length = 5
     if request.method == "POST":
         count = int(request.form.get("count", 10))
         digit_length = int(request.form.get("digit_length", 5))
         last_two = None
         for _ in range(count):
             while True:
-                pw = generate_password(digit_length=digit_length)
+                pw = generate_password(digit_length)
                 pw_last_two = pw[-2:]
                 if pw_last_two != last_two:
                     passwords.append(pw)
                     save_history(pw)
                     last_two = pw_last_two
                     break
-    return render_template("index.html", passwords=passwords)
+    return render_template("index.html", passwords=passwords, digit_length=digit_length)
 
 @app.route("/history")
 def history():
@@ -94,16 +96,16 @@ def history():
 
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-    c.execute('SELECT password, created_at FROM history ORDER BY id DESC LIMIT ? OFFSET ?', (per_page, offset))
+    c.execute('SELECT password, created_at, user_agent FROM history ORDER BY id DESC LIMIT ? OFFSET ?', (per_page, offset))
     rows = c.fetchall()
     conn.close()
 
     jst = timezone(timedelta(hours=9))
     converted = []
-    for pw, created_at in rows:
+    for pw, created_at, ua in rows:
         utc_time = datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S')
         jst_time = utc_time.replace(tzinfo=timezone.utc).astimezone(jst)
-        converted.append((pw, jst_time.strftime('%Y-%m-%d %H:%M:%S')))
+        converted.append((pw, jst_time.strftime('%Y-%m-%d %H:%M:%S'), ua))
     return render_template("history.html", logs=converted, current_page=page)
 
 @app.route("/download", methods=["POST"])
