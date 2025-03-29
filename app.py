@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, send_file, request
 import io
 from openpyxl import Workbook
@@ -13,13 +14,13 @@ DB_NAME = "history.db"
 def init_db():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-    c.execute('''
+    c.execute("""
         CREATE TABLE IF NOT EXISTS history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             password TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    """)
     conn.commit()
     conn.close()
 
@@ -30,7 +31,7 @@ def save_history(password):
     conn.commit()
     conn.close()
 
-def generate_password():
+def generate_password(digit_length=5):
     custom_alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz"
 
     def has_consecutive_sequence(s):
@@ -51,7 +52,7 @@ def generate_password():
                 return True
         return False
 
-    def generate_non_consecutive_digits(length=5):
+    def generate_non_consecutive_digits(length):
         digits = string.digits
         while True:
             result = ''.join(random.choices(digits, k=length))
@@ -64,7 +65,7 @@ def generate_password():
         first_three = first_char + next_two_chars
         if has_repeated_characters(first_three):
             continue
-        last_digits = generate_non_consecutive_digits()
+        last_digits = generate_non_consecutive_digits(digit_length)
         return first_three + '-' + last_digits
 
 @app.route("/", methods=["GET", "POST"])
@@ -72,10 +73,11 @@ def index():
     passwords = []
     if request.method == "POST":
         count = int(request.form.get("count", 10))
+        digit_length = int(request.form.get("digit_length", 5))
         last_two = None
         for _ in range(count):
             while True:
-                pw = generate_password()
+                pw = generate_password(digit_length=digit_length)
                 pw_last_two = pw[-2:]
                 if pw_last_two != last_two:
                     passwords.append(pw)
