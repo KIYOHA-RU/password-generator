@@ -8,7 +8,6 @@ import sqlite3
 from datetime import datetime, timezone, timedelta
 
 app = Flask(__name__)
-
 DB_NAME = "history.db"
 
 def init_db():
@@ -32,6 +31,8 @@ def save_history(password):
     conn.close()
 
 def generate_password():
+    custom_alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz"
+
     def has_consecutive_sequence(s):
         for i in range(len(s) - 2):
             if int(s[i+1]) == int(s[i]) + 1 and int(s[i+2]) == int(s[i+1]) + 1:
@@ -50,21 +51,20 @@ def generate_password():
                 return True
         return False
 
-    def generate_non_consecutive_digits(length):
+    def generate_non_consecutive_digits(length=5):
         digits = string.digits
         while True:
             result = ''.join(random.choices(digits, k=length))
             if not has_consecutive_sequence(result) and not has_same_digit_repeat(result):
                 return result
 
-    custom_alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz"
     while True:
         first_char = random.choice(custom_alphabet[:24])
         next_two_chars = ''.join(random.choices(custom_alphabet[24:], k=2))
         first_three = first_char + next_two_chars
         if has_repeated_characters(first_three):
             continue
-        last_digits = generate_non_consecutive_digits(4)
+        last_digits = generate_non_consecutive_digits()
         return first_three + '-' + last_digits
 
 @app.route("/", methods=["GET", "POST"])
@@ -96,7 +96,6 @@ def history():
     rows = c.fetchall()
     conn.close()
 
-    # JST変換
     jst = timezone(timedelta(hours=9))
     converted = []
     for pw, created_at in rows:
@@ -115,7 +114,12 @@ def download():
     stream = io.BytesIO()
     wb.save(stream)
     stream.seek(0)
-    return send_file(stream, as_attachment=True, download_name="passwords.xlsx", mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    return send_file(
+        stream,
+        as_attachment=True,
+        download_name="passwords.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 if __name__ == "__main__":
     init_db()
