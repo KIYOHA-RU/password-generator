@@ -8,7 +8,7 @@
 </head>
 <body class="bg-gradient-to-br from-purple-200 via-sky-100 to-green-100 text-gray-800 font-[Ayuthaya,Helvetica,sans-serif] min-h-screen flex flex-col items-center py-12 px-4">
 
-  <h1 class="text-4xl font-bold text-center text-purple-700 mb-8 drop-shadow">パスワード生成ツール</h1>
+  <h1 class="text-4xl font-bold text-center text-purple-700 mb-8 drop-shadow">パスワード生成ツール</h1><br> <h1 class="text-4xl font-bold text-center text-purple-700 mb-8 drop-shadow">(アルファベット3桁"-"数字4桁or5桁)</h1></br>
 
   <form method="POST" class="backdrop-blur-lg bg-white/60 p-8 rounded-2xl shadow-xl w-full max-w-md mb-6 transition transform hover:scale-105">
     <label class="block text-lg mb-2 text-purple-800 font-semibold">生成数：</label>
@@ -25,8 +25,10 @@
 
   <div class="bg-white/50 backdrop-blur-md p-4 rounded-xl shadow w-full max-w-md mb-10 text-sm text-purple-900">
     <p>✅ 先頭アルファベット3文字は <strong>連続・重複なし</strong></p>
-    <p>✅ 数字は <strong>4桁または5桁選択可</strong>、<strong>連番・同一数字なし</strong></p>
+    <p>✅ 数字は <strong>4桁または5桁選択可</strong>、<strong>連番・重複なし</strong></p>
     <p>✅ (生成例) Hix-39017</p>
+    <p>✅ 管理者がリセットしない限り過去に生成したPWは２度と出てこない。上記の条件で数字4桁で約7億、5桁で70億個は作れる(筈)。</p>
+    
   </div>
 
   {% if passwords %}
@@ -59,7 +61,7 @@
   </div>
 
   <footer class="mt-4 text-center text-sm text-purple-600">
-    © NAKAE
+    <a href="https://x.com/Bertone_Miura" target="_blank" class="hover:underline">@ Bertone_Miura👣</a>
   </footer>
 
 </body>
