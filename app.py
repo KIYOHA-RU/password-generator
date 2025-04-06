@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_file
+from flask import Flask, render_template, send_file, request
 import io
 from openpyxl import Workbook
 import random
@@ -8,11 +8,7 @@ import sqlite3
 from datetime import datetime, timezone, timedelta
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'  # 必ず変更して運用してください
-
 DB_NAME = "history.db"
-USERNAME = "admin"
-PASSWORD = "password123"  # 必ず安全なパスワードに変更してください
 
 def init_db():
     conn = sqlite3.connect(DB_NAME)
@@ -73,27 +69,8 @@ def generate_password(digit_length=5):
         last_digits = generate_non_consecutive_digits(digit_length)
         return first_three + '-' + last_digits
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-        if username == USERNAME and password == PASSWORD:
-            session["user"] = username
-            return redirect(url_for("index"))
-        return render_template("login.html", error="ログインに失敗しました")
-    return render_template("login.html")
-
-@app.route("/logout")
-def logout():
-    session.pop("user", None)
-    return redirect(url_for("login"))
-
 @app.route("/", methods=["GET", "POST"])
 def index():
-    if "user" not in session:
-        return redirect(url_for("login"))
-
     passwords = []
     digit_length = 5
     if request.method == "POST":
@@ -113,9 +90,6 @@ def index():
 
 @app.route("/history")
 def history():
-    if "user" not in session:
-        return redirect(url_for("login"))
-
     page = int(request.args.get('page', 1))
     per_page = 500
     offset = (page - 1) * per_page
@@ -136,9 +110,6 @@ def history():
 
 @app.route("/download", methods=["POST"])
 def download():
-    if "user" not in session:
-        return redirect(url_for("login"))
-
     passwords = request.form.getlist("passwords")
     wb = Workbook()
     ws = wb.active
@@ -147,10 +118,15 @@ def download():
     stream = io.BytesIO()
     wb.save(stream)
     stream.seek(0)
+
+    # JSTで現在時刻を取得してファイル名に
+    jst_now = datetime.now(timezone(timedelta(hours=9)))
+    filename = jst_now.strftime("password_%Y%m%d_%H%M%S.xlsx")
+
     return send_file(
         stream,
         as_attachment=True,
-        download_name="passwords.xlsx",
+        download_name=filename,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
