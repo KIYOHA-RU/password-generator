@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_file, request
+from flask import Flask, render_template, send_file, request, redirect, url_for, session
 import io
 from openpyxl import Workbook
 import random
@@ -8,19 +8,24 @@ import sqlite3
 from datetime import datetime, timezone, timedelta
 
 app = Flask(__name__)
+app.secret_key = "super-secret-key"
+app.permanent_session_lifetime = timedelta(minutes=10)
+
 DB_NAME = "history.db"
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "P@ssw0rd1101"
 
 def init_db():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-    c.execute('''
+    c.execute("""
         CREATE TABLE IF NOT EXISTS history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             password TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             user_agent TEXT
         )
-    ''')
+    """)
     conn.commit()
     conn.close()
 
@@ -71,6 +76,9 @@ def generate_password(digit_length=5):
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    if not session.get("logged_in"):
+        return redirect(url_for("login"))
+
     passwords = []
     digit_length = 5
     if request.method == "POST":
@@ -90,6 +98,9 @@ def index():
 
 @app.route("/history")
 def history():
+    if not session.get("logged_in"):
+        return redirect(url_for("login"))
+
     page = int(request.args.get('page', 1))
     per_page = 500
     offset = (page - 1) * per_page
@@ -110,6 +121,9 @@ def history():
 
 @app.route("/download", methods=["POST"])
 def download():
+    if not session.get("logged_in"):
+        return redirect(url_for("login"))
+
     passwords = request.form.getlist("passwords")
     wb = Workbook()
     ws = wb.active
@@ -119,7 +133,6 @@ def download():
     wb.save(stream)
     stream.seek(0)
 
-    # JSTで現在時刻を取得してファイル名に
     jst_now = datetime.now(timezone(timedelta(hours=9)))
     filename = jst_now.strftime("password_%Y%m%d_%H%M%S.xlsx")
 
@@ -129,6 +142,22 @@ def download():
         download_name=filename,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            session["logged_in"] = True
+            session.permanent = True
+            return redirect(url_for("index"))
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
 
 if __name__ == "__main__":
     init_db()
